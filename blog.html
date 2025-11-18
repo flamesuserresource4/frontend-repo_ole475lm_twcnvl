@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>[Surname] Interactive Blog</title>
+  <!-- jQuery CDN -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <!-- Spline Viewer (Web Component) -->
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.31/build/spline-viewer.js"></script>
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --fg: #e8e9ee;
+      --muted: #9aa1aa;
+      --accent: #ef4444; /* soft red */
+      --card: #131823cc;
+      --card-border: #223042;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--fg);
+      background: radial-gradient(1200px 600px at 10% -10%, #1b2230 0%, #0b0d12 40%), #0b0d12;
+      line-height: 1.55;
+    }
+    /* Theme toggle (light) */
+    body.light {
+      --bg: #ffffff;
+      --fg: #0b0d12;
+      --muted: #4b5563;
+      --card: #f8fafcdd;
+      --card-border: #e5e7eb;
+      background: linear-gradient(180deg, #ffffff, #f5f7fb);
+      color: var(--fg);
+    }
+
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 48vh;
+      min-height: 320px;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    spline-viewer {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(1200px 600px at 90% -20%, rgba(239,68,68,0.08), transparent 40%);
+      pointer-events: none; /* don't block interaction with Spline */
+    }
+    .hero-content {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 24px;
+    }
+    h1 {
+      font-size: clamp(28px, 4vw, 48px);
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      color: var(--muted);
+      max-width: 820px;
+      margin: 0 auto;
+      font-size: clamp(14px, 1.6vw, 18px);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: -64px auto 64px;
+      padding: 0 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      backdrop-filter: blur(6px);
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .btn {
+      background: #182235;
+      color: #e9eef6;
+      border: 1px solid #2a3a55;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform .08s ease, background .2s ease, color .2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary { background: var(--accent); color: white; border-color: #d63b3b; }
+
+    .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .gallery figure { margin: 0; overflow: hidden; border-radius: 12px; border: 1px solid var(--card-border); background: #0f1420; }
+    .gallery img { width: 100%; display: block; transition: transform .4s ease; }
+    .gallery figcaption { padding: 8px 10px; color: var(--muted); font-size: 14px; }
+    .gallery figure:hover img { transform: scale(1.05); }
+
+    .content { color: #d7dfeb; }
+    .content p { margin: 0 0 14px; }
+    .hidden { display: none; }
+
+    .comments { margin-top: 16px; }
+    .comment { padding: 12px; border-radius: 10px; border: 1px dashed var(--card-border); margin-top: 10px; background: rgba(255,255,255,0.02); }
+    .muted { color: var(--muted); }
+
+    .footer { text-align: center; color: var(--muted); padding: 18px 0 36px; }
+    a.link { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <!-- HERO with Spline cover background -->
+  <header class="hero">
+    <spline-viewer url="https://prod.spline.design/zhZFnwyOYLgqlLWk/scene.splinecode"></spline-viewer>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div>
+        <h1 id="blog-title" title="Double‑click to toggle theme">[Surname] Interactive Blog</h1>
+        <p class="subtitle">A minimalist, interactive post exploring dynamic UI with jQuery and a modern 3D cover. Double‑click the title to switch themes.</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="container">
+    <section class="card">
+      <div class="toolbar">
+        <button id="btn-show-more" class="btn primary" aria-controls="extra-content">Show More</button>
+        <button id="btn-change-theme" class="btn" aria-pressed="false">Change Theme</button>
+        <button id="btn-add-comment" class="btn" aria-controls="comments">Add Comment</button>
+        <button id="btn-swap-image" class="btn" data-toggle="img">Swap Cover Image</button>
+        <button id="btn-toggle-gallery" class="btn">Toggle Gallery</button>
+      </div>
+
+      <!-- Content area -->
+      <article class="content" id="post">
+        <p id="lead">Welcome! This post demonstrates event handling, attribute manipulation, DOM updates, and visual effects using jQuery. Enjoy the interactive bits below.</p>
+        <p class="hidden" id="extra-content">Here is some additional context revealed on demand. We can progressively disclose information and keep the interface clean.</p>
+      </article>
+
+      <!-- Image gallery: at least three images -->
+      <section class="gallery" id="gallery" aria-label="Image gallery">
+        <figure>
+          <img id="img-1" src="https://images.unsplash.com/photo-1527430253228-e93688616381?q=80&w=1200&auto=format&fit=crop" alt="Minimal tiles" data-index="1" />
+          <figcaption class="muted">Hover to preview. Click to focus.</figcaption>
+        </figure>
+        <figure>
+          <img id="img-2" src="https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?q=80&w=1200&auto=format&fit=crop" alt="Soft red accent" data-index="2" />
+          <figcaption class="muted">Images change on interaction.</figcaption>
+        </figure>
+        <figure>
+          <img id="img-3" src="https://images.unsplash.com/photo-1747940920030-199da656630c?ixid=M3w3OTkxMTl8MHwxfHNlYXJjaHwxfHxEaWdpdGFsJTIwZ3JpZHxlbnwwfDB8fHwxNzYzNDY5OTcyfDA&ixlib=rb-4.1.0&w=1600&auto=format&fit=crop&q=80" alt="Digital grid" data-index="3" />
+          <figcaption class="muted">Double‑click an image to swap.</figcaption>
+        </figure>
+      </section>
+
+      <!-- Comments container -->
+      <section id="comments" class="comments" aria-live="polite">
+        <p class="muted">No comments yet. Be the first to add one.</p>
+      </section>
+    </section>
+
+    <p class="footer">Built with jQuery interactions and a live 3D cover. <a id="source-link" class="link" href="#" target="_blank" rel="noopener">View source</a></p>
+  </main>
+
+  <script>
+    // Utility: next demo image
+    const altImages = [
+      'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop'
+    ];
+
+    $(function() {
+      // Effects on load: fade in lead, then slide in gallery
+      $('#lead').hide().fadeIn(600);
+      $('#gallery').hide().delay(350).slideDown(500);
+
+      // 1) CLICK: Show more toggles extra content with slide + attribute changes
+      $('#btn-show-more').on('click', function() {
+        const $btn = $(this);
+        const expanded = $btn.attr('aria-expanded') === 'true';
+        // Attribute manipulation #1: set aria-expanded
+        $btn.attr('aria-expanded', String(!expanded));
+        // Effect: slideToggle the extra content
+        $('#extra-content').stop(true, true).slideToggle(350);
+        // Attribute manipulation #2: update button text via text() and data-state
+        const newText = expanded ? 'Show More' : 'Show Less';
+        $btn.text(newText).attr('data-state', expanded ? 'closed' : 'open');
+      });
+
+      // 2) CLICK: Change theme (also bound to title dblclick)
+      function toggleTheme() {
+        const light = $('body').toggleClass('light').hasClass('light');
+        // Attribute manipulation #3: reflect state on button
+        $('#btn-change-theme').attr('aria-pressed', String(light));
+        // Effect: subtle body flash via jQuery .animate on background-position
+        $('body').stop(true).animate({ scrollTop: $(window).scrollTop() }, 1); // no-op to flush animations
+      }
+      $('#btn-change-theme').on('click', toggleTheme);
+      // 3) DBLCLICK: on title toggles theme (different event)
+      $('#blog-title').on('dblclick', toggleTheme);
+
+      // 4) HOVER: Image captions update on hover and toggle a class
+      $('#gallery figure').hover(function() {
+        $(this).find('figcaption').text('Nice! You\'re hovering.').toggleClass('active'); // Attribute-like class toggle (#4)
+      }, function() {
+        $(this).find('figcaption').text('Interaction finished.').toggleClass('active');
+      });
+
+      // 5) CLICK: Focus image highlights and dims others using fade effects
+      $('#gallery img').on('click', function() {
+        const $img = $(this);
+        $('#gallery img').not($img).stop(true).fadeTo(200, 0.4);
+        $img.stop(true).fadeTo(200, 1);
+        // Attribute manipulation #5: set title attribute with index
+        const idx = $img.data('index');
+        $img.attr('title', 'Focused image #' + idx);
+      });
+
+      // 6) DBLCLICK on any image: swap src with an alternate image
+      $('#gallery img').on('dblclick', function() {
+        const $img = $(this);
+        const currentSrc = $img.attr('src');
+        // Attribute manipulation #6: change src
+        const nextSrc = altImages[Math.floor(Math.random()*altImages.length)];
+        $img.attr({ src: nextSrc, alt: 'Alternate view' });
+        // Effect: quick hide/show to emphasize change
+        $img.hide().fadeIn(250);
+      });
+
+      // Toolbar: Swap first image via button
+      $('#btn-swap-image').on('click', function() {
+        const $img = $('#img-1');
+        const oldSrc = $img.attr('src');
+        const next = altImages.find(u => u !== oldSrc) || altImages[0];
+        $img.attr('src', next);
+      });
+
+      // Toolbar: Toggle gallery visibility with slide effect
+      $('#btn-toggle-gallery').on('click', function() {
+        $('#gallery').stop(true, true).slideToggle(300);
+      });
+
+      // DOM Manipulation: Add Comment
+      let commentCount = 0;
+      $('#btn-add-comment').on('click', function() {
+        commentCount++;
+        // Add: append new comment element
+        const $comment = $('<div/>', {
+          class: 'comment',
+          'data-seq': commentCount,
+          html: `<strong>Comment #${commentCount}</strong><p class="muted">This was added dynamically.</p>`
+        }).hide();
+        $('#comments').append($comment);
+        $comment.slideDown(250);
+
+        // Modify: update hint text
+        $('#comments > p.muted').remove(); // Remove placeholder once first comment is added
+      });
+
+      // Extra DOM Manipulation: Insert a dynamic link and then modify its attributes
+      const $source = $('#source-link');
+      // Set href and title on load
+      $source.attr({ href: 'https://code.jquery.com/', title: 'jQuery CDN' });
+      // Later, on hover, change destination
+      $source.on('mouseenter', function(){
+        $(this).attr('href', 'https://jquery.com/').text('jQuery Homepage');
+      }).on('mouseleave', function(){
+        $(this).attr('href', 'https://code.jquery.com/').text('jQuery CDN');
+      });
+
+      // Keyboard accessibility: pressing Enter on buttons triggers click
+      $('.btn').on('keypress', function(e) { if (e.key === 'Enter') $(this).click(); });
+    });
+  </script>
+</body>
+</html>
